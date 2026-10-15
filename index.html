@@ -164,7 +164,7 @@ details.dept[open]>summary::after{content:"–"}
     <div class="acts"><button class="btn" id="b-word">Xuất Word</button><button class="btn" id="b-csv">Xuất CSV việc</button><button class="btn" id="b-print">In / PDF</button><button class="btn" id="b-copy">Sao chép biên bản</button></div>
   </div>
   <main id="main"></main>
-  <p class="foot">Ô tick “đã xong” chỉ lưu trên trình duyệt này. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 2</b></p>
+  <p class="foot">Ô tick “đã xong” chỉ lưu trên trình duyệt này. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 3</b></p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"></script>
@@ -212,7 +212,10 @@ function makeFirebaseStore(){
   firebase.initializeApp(CFG);
   var auth=firebase.auth(),db=firebase.firestore(),TS=firebase.firestore.Timestamp,FV=firebase.firestore.FieldValue;
   function toDate(v){return v&&v.toDate?v.toDate():(v?new Date(v):null)}
-  function norm(doc){var d=doc.data();d.id=doc.id;d.editUntil=toDate(d.editUntil);d.updatedAt=toDate(d.updatedAt);return d}
+  var BK=['attendees','principles','depts','general','tasks','signers'];
+  function pack(d){var o={},b={};Object.keys(d).forEach(function(k){if(BK.indexOf(k)>=0)b[k]=d[k];else o[k]=d[k]});o.body=JSON.stringify(b);return o}
+  function unpack(d){if(d.body){try{var b=JSON.parse(d.body);Object.keys(b).forEach(function(k){d[k]=b[k]})}catch(e){}delete d.body}return d}
+  function norm(doc){var d=unpack(doc.data());d.id=doc.id;d.editUntil=toDate(d.editUntil);d.updatedAt=toDate(d.updatedAt);return d}
   return{
     onAuth:function(cb){auth.onAuthStateChanged(cb)},
     signIn:function(){return auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())},
@@ -225,16 +228,16 @@ function makeFirebaseStore(){
       return db.runTransaction(function(t){return t.get(ref).then(function(s){
         var cur=s.data();if((cur.rev||0)!==baseRev){var e=new Error('conflict');e.code='conflict';throw e}
         var nr=(cur.rev||0)+1;
-        t.update(ref,Object.assign({},patch,{updatedAt:FV.serverTimestamp(),updatedBy:who,rev:nr}));
-        t.set(h,{at:FV.serverTimestamp(),by:who,rev:nr,snapshot:patch});
+        t.update(ref,Object.assign({},pack(patch),{updatedAt:FV.serverTimestamp(),updatedBy:who,rev:nr}));
+        t.set(h,{at:FV.serverTimestamp(),by:who,rev:nr,snapshot:pack(patch)});
         return nr})})},
-    importMeeting:function(m,who){var d=Object.assign({},m);d.editUntil=null;d.locked=false;d.rev=0;d.updatedBy=who;d.updatedAt=FV.serverTimestamp();
+    importMeeting:function(m,who){var d=pack(m);d.editUntil=null;d.locked=false;d.rev=0;d.updatedBy=who;d.updatedAt=FV.serverTimestamp();
       return db.collection('meetings').doc(m.id).set(d)},
     setWindow:function(id,until,locked){return db.collection('meetings').doc(id).update({editUntil:until?TS.fromDate(until):null,locked:!!locked})},
     editors:function(){return db.collection('editors').get().then(function(q){return q.docs.map(function(d){var x=d.data();x.email=d.id;return x})})},
     setEditor:function(email,role,name){return db.collection('editors').doc(email).set({role:role,name:name||''})},
     delEditor:function(email){return db.collection('editors').doc(email).delete()},
-    history:function(id){return db.collection('meetings').doc(id).collection('history').orderBy('at','desc').limit(20).get().then(function(q){return q.docs.map(function(d){var x=d.data();x.id=d.id;x.at=toDate(x.at);return x})})},
+    history:function(id){return db.collection('meetings').doc(id).collection('history').orderBy('at','desc').limit(20).get().then(function(q){return q.docs.map(function(d){var x=d.data();x.id=d.id;x.at=toDate(x.at);x.snapshot=unpack(x.snapshot||{});return x})})},
     now:function(){return new Date()}
   };
 }
