@@ -164,7 +164,7 @@ details.dept[open]>summary::after{content:"–"}
     <div class="acts"><button class="btn" id="b-word">Xuất Word</button><button class="btn" id="b-csv">Xuất CSV việc</button><button class="btn" id="b-print">In / PDF</button><button class="btn" id="b-copy">Sao chép biên bản</button></div>
   </div>
   <main id="main"></main>
-  <p class="foot">Ô tick “đã xong” chỉ lưu trên trình duyệt này. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 3</b></p>
+  <p class="foot">Ô tick “đã xong” chỉ lưu trên trình duyệt này. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 4</b></p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"></script>
@@ -235,7 +235,7 @@ function makeFirebaseStore(){
       return db.collection('meetings').doc(m.id).set(d)},
     setWindow:function(id,until,locked){return db.collection('meetings').doc(id).update({editUntil:until?TS.fromDate(until):null,locked:!!locked})},
     editors:function(){return db.collection('editors').get().then(function(q){return q.docs.map(function(d){var x=d.data();x.email=d.id;return x})})},
-    setEditor:function(email,role,name){return db.collection('editors').doc(email).set({role:role,name:name||''})},
+    setEditor:function(email,role,name,title){return db.collection('editors').doc(email).set({role:role,name:name||'',title:title||''})},
     delEditor:function(email){return db.collection('editors').doc(email).delete()},
     history:function(id){return db.collection('meetings').doc(id).collection('history').orderBy('at','desc').limit(20).get().then(function(q){return q.docs.map(function(d){var x=d.data();x.id=d.id;x.at=toDate(x.at);x.snapshot=unpack(x.snapshot||{});return x})})},
     now:function(){return new Date()}
@@ -417,20 +417,31 @@ function renderAdmin(){
   var m=S.cur,box=$('admin');
   var until=m&&m.editUntil&&m.editUntil>now()?m.editUntil:new Date(now().getTime()+48*3600000);
   var h='<h3>Công cụ quản lý</h3>';
-  if(m)h+='<div class="ad"><h4>Thời hạn cho người khác chỉnh sửa</h4><div class="row"><label>Hạn chót<input type="datetime-local" id="a-until" value="'+toLocalInput(until)+'"></label>'+[24,48,72].map(function(x){return'<button class="btn" data-pre="'+x+'">+'+x+' giờ</button>'}).join('')+'</div><div class="row"><button class="btn pri" id="a-open">Mở chỉnh sửa tới hạn này</button><button class="btn" id="a-lock">Khóa ngay</button><button class="btn" id="a-unlock">Gỡ khóa</button></div><p class="hint">Sau hạn chót, hệ thống tự từ chối mọi bản lưu của người khác. Chỉ tài khoản quản lý còn sửa được.</p></div>';
+  if(m)h+='<div class="ad"><h4>Thời hạn cho người khác chỉnh sửa</h4><div class="row"><label>Hạn chót<input type="datetime-local" id="a-until" value="'+toLocalInput(until)+'"></label>'+[3,24,48,72].map(function(x){return'<button class="btn" data-pre="'+x+'">+'+x+' giờ</button>'}).join('')+'<button class="btn" id="pre-pm">Hôm nay 17:00</button><button class="btn" id="pre-pm2">Ngày mai 17:00</button>'+'</div><div class="row"><button class="btn pri" id="a-open">Mở chỉnh sửa tới hạn này</button><button class="btn" id="a-lock">Khóa ngay</button><button class="btn" id="a-unlock">Gỡ khóa</button></div><p class="hint">Sau hạn chót, hệ thống tự từ chối mọi bản lưu của người khác. Chỉ tài khoản quản lý còn sửa được.</p></div>';
   h+='<div class="ad"><h4>Người dùng được phép</h4><div id="a-users" class="hint">Đang tải...</div><div class="row"><input id="u-email" type="email" placeholder="email Google, ví dụ ten@gmail.com"><input id="u-name" placeholder="Tên hiển thị"><select id="u-role"><option value="editor">Được sửa</option><option value="viewer">Chỉ xem</option></select><button class="btn pri" id="u-add">Thêm</button></div><p class="hint">Chỉ những email có trong danh sách này mới xem được nội dung. Nhập đúng email mà họ dùng để đăng nhập Google.</p></div>';
   h+='<div class="ad"><h4>Nhập biên bản mới (file JSON do Claude lập)</h4><div class="row"><input type="file" id="j-file" accept=".json,application/json"><button class="btn pri" id="j-go">Nhập</button></div><p class="hint" id="j-msg"></p></div>';
   if(m)h+='<div class="ad"><h4>Lịch sử và sao lưu</h4><div class="row"><button class="btn" id="h-load">Xem lịch sử sửa</button><button class="btn" id="h-export">Tải bản sao lưu JSON</button></div><div id="h-list"></div></div>';
   box.innerHTML=h;
   var set=function(ms){$('a-until').value=toLocalInput(new Date(now().getTime()+ms*3600000))};
-  if(m){Array.prototype.forEach.call(box.querySelectorAll('[data-pre]'),function(b){b.onclick=function(){set(+b.dataset.pre)}});
+  var at17=function(add){var d=new Date(now());d.setDate(d.getDate()+add);d.setHours(17,0,0,0);$('a-until').value=toLocalInput(d)};
+  if(m){if($('pre-pm')){$('pre-pm').onclick=function(){at17(0)};$('pre-pm2').onclick=function(){at17(1)}}
+  Array.prototype.forEach.call(box.querySelectorAll('[data-pre]'),function(b){b.onclick=function(){set(+b.dataset.pre)}});
   $('a-open').onclick=function(){var v=$('a-until').value;if(!v){toast('Chọn hạn chót trước');return}var dt=new Date(v);if(dt<=now()){toast('Hạn chót phải ở tương lai');return}
     store.setWindow(m.id,dt,false).then(function(){m.editUntil=dt;m.locked=false;toast('Đã mở chỉnh sửa tới '+fmtDT(dt));renderAll();$('admin').hidden=false;renderAdmin()}).catch(function(e){toast('Lỗi: '+e.message)})};
   $('a-lock').onclick=function(){store.setWindow(m.id,m.editUntil||null,true).then(function(){m.locked=true;toast('Đã khóa');renderAll();$('admin').hidden=false;renderAdmin()}).catch(function(e){toast('Lỗi: '+e.message)})};
   $('a-unlock').onclick=function(){store.setWindow(m.id,m.editUntil||null,false).then(function(){m.locked=false;toast('Đã gỡ khóa');renderAll();$('admin').hidden=false;renderAdmin()}).catch(function(e){toast('Lỗi: '+e.message)})};
   }
   function loadUsers(){store.editors().then(function(list){
-    $('a-users').innerHTML=list.length?'<table><tbody>'+list.map(function(u){return'<tr><td>'+esc(u.email)+'</td><td>'+esc(u.name||'')+'</td><td>'+(u.role==='editor'?'Được sửa':'Chỉ xem')+'</td><td><button class="btn x" data-rm="'+esc(u.email)+'">Xóa</button></td></tr>'}).join('')+'</tbody></table>':'Chưa có người dùng nào.';
+    var att=(m&&m.attendees)||[],used={},rows='';
+    att.forEach(function(a,i){var u=list.filter(function(x){return x.name===a.name})[0];if(u)used[u.email]=1;
+      rows+='<tr data-ai="'+i+'"><td><b>'+esc(a.name)+'</b><br><span class="hint">'+esc(a.role)+'</span></td><td><input type="email" class="ue" placeholder="email Google" value="'+esc(u?u.email:'')+'" data-old="'+esc(u?u.email:'')+'"></td><td><select class="ur"><option value="editor"'+(u&&u.role==='viewer'?'':' selected')+'>Được sửa</option><option value="viewer"'+(u&&u.role==='viewer'?' selected':'')+'>Chỉ xem</option></select></td><td><button class="btn pri us">Lưu</button></td></tr>'});
+    var other=list.filter(function(u){return !used[u.email]});
+    other.forEach(function(u){rows+='<tr><td>'+esc(u.name||'(không tên)')+(u.title?'<br><span class="hint">'+esc(u.title)+'</span>':'')+'</td><td>'+esc(u.email)+'</td><td>'+(u.role==='editor'?'Được sửa':'Chỉ xem')+'</td><td><button class="btn x" data-rm="'+esc(u.email)+'">Xóa</button></td></tr>'});
+    $('a-users').innerHTML=rows?'<div class="tw"><table><thead><tr><th>Họ tên, chức danh</th><th>Email Google</th><th>Quyền</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>':'Chưa có người dùng nào.';
+    Array.prototype.forEach.call($('a-users').querySelectorAll('.us'),function(btn){btn.onclick=function(){var tr=btn.closest('tr'),a=att[+tr.dataset.ai],inp=tr.querySelector('.ue'),e=inp.value.trim().toLowerCase(),old=inp.dataset.old;
+      if(!e){if(old){store.delEditor(old).then(function(){toast('Đã bỏ quyền của '+a.name);loadUsers()})}return}
+      if(!/^\S+@\S+\.\S+$/.test(e)){toast('Email chưa hợp lệ');return}
+      store.setEditor(e,tr.querySelector('.ur').value,a.name,a.role).then(function(){return old&&old!==e?store.delEditor(old):null}).then(function(){toast('Đã lưu '+a.name);loadUsers()}).catch(function(er){toast('Lỗi: '+er.message)})}});
     Array.prototype.forEach.call($('a-users').querySelectorAll('[data-rm]'),function(b){b.onclick=function(){store.delEditor(b.dataset.rm).then(loadUsers)}})}).catch(function(e){$('a-users').textContent='Lỗi: '+e.message})}
   loadUsers();
   $('u-add').onclick=function(){var e=$('u-email').value.trim().toLowerCase();if(!/^\S+@\S+\.\S+$/.test(e)){toast('Email chưa hợp lệ');return}
