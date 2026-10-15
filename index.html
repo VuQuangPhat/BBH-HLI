@@ -164,7 +164,7 @@ details.dept[open]>summary::after{content:"–"}
     <div class="acts"><button class="btn" id="b-word">Xuất Word</button><button class="btn" id="b-csv">Xuất CSV việc</button><button class="btn" id="b-print">In / PDF</button><button class="btn" id="b-copy">Sao chép biên bản</button></div>
   </div>
   <main id="main"></main>
-  <p class="foot">Ô tick “đã xong” chỉ lưu trên trình duyệt này. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt.</p>
+  <p class="foot">Ô tick “đã xong” chỉ lưu trên trình duyệt này. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 2</b></p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"></script>
@@ -411,20 +411,21 @@ function doSave(){
 
 /* ====== Công cụ quản lý (chỉ chủ) ====== */
 function renderAdmin(){
-  var m=S.cur,box=$('admin');if(!m)return;
-  var until=m.editUntil&&m.editUntil>now()?m.editUntil:new Date(now().getTime()+48*3600000);
+  var m=S.cur,box=$('admin');
+  var until=m&&m.editUntil&&m.editUntil>now()?m.editUntil:new Date(now().getTime()+48*3600000);
   var h='<h3>Công cụ quản lý</h3>';
-  h+='<div class="ad"><h4>Thời hạn cho người khác chỉnh sửa</h4><div class="row"><label>Hạn chót<input type="datetime-local" id="a-until" value="'+toLocalInput(until)+'"></label>'+[24,48,72].map(function(x){return'<button class="btn" data-pre="'+x+'">+'+x+' giờ</button>'}).join('')+'</div><div class="row"><button class="btn pri" id="a-open">Mở chỉnh sửa tới hạn này</button><button class="btn" id="a-lock">Khóa ngay</button><button class="btn" id="a-unlock">Gỡ khóa</button></div><p class="hint">Sau hạn chót, hệ thống tự từ chối mọi bản lưu của người khác. Chỉ tài khoản quản lý còn sửa được.</p></div>';
+  if(m)h+='<div class="ad"><h4>Thời hạn cho người khác chỉnh sửa</h4><div class="row"><label>Hạn chót<input type="datetime-local" id="a-until" value="'+toLocalInput(until)+'"></label>'+[24,48,72].map(function(x){return'<button class="btn" data-pre="'+x+'">+'+x+' giờ</button>'}).join('')+'</div><div class="row"><button class="btn pri" id="a-open">Mở chỉnh sửa tới hạn này</button><button class="btn" id="a-lock">Khóa ngay</button><button class="btn" id="a-unlock">Gỡ khóa</button></div><p class="hint">Sau hạn chót, hệ thống tự từ chối mọi bản lưu của người khác. Chỉ tài khoản quản lý còn sửa được.</p></div>';
   h+='<div class="ad"><h4>Người dùng được phép</h4><div id="a-users" class="hint">Đang tải...</div><div class="row"><input id="u-email" type="email" placeholder="email Google, ví dụ ten@gmail.com"><input id="u-name" placeholder="Tên hiển thị"><select id="u-role"><option value="editor">Được sửa</option><option value="viewer">Chỉ xem</option></select><button class="btn pri" id="u-add">Thêm</button></div><p class="hint">Chỉ những email có trong danh sách này mới xem được nội dung. Nhập đúng email mà họ dùng để đăng nhập Google.</p></div>';
   h+='<div class="ad"><h4>Nhập biên bản mới (file JSON do Claude lập)</h4><div class="row"><input type="file" id="j-file" accept=".json,application/json"><button class="btn pri" id="j-go">Nhập</button></div><p class="hint" id="j-msg"></p></div>';
-  h+='<div class="ad"><h4>Lịch sử và sao lưu</h4><div class="row"><button class="btn" id="h-load">Xem lịch sử sửa</button><button class="btn" id="h-export">Tải bản sao lưu JSON</button></div><div id="h-list"></div></div>';
+  if(m)h+='<div class="ad"><h4>Lịch sử và sao lưu</h4><div class="row"><button class="btn" id="h-load">Xem lịch sử sửa</button><button class="btn" id="h-export">Tải bản sao lưu JSON</button></div><div id="h-list"></div></div>';
   box.innerHTML=h;
   var set=function(ms){$('a-until').value=toLocalInput(new Date(now().getTime()+ms*3600000))};
-  Array.prototype.forEach.call(box.querySelectorAll('[data-pre]'),function(b){b.onclick=function(){set(+b.dataset.pre)}});
+  if(m){Array.prototype.forEach.call(box.querySelectorAll('[data-pre]'),function(b){b.onclick=function(){set(+b.dataset.pre)}});
   $('a-open').onclick=function(){var v=$('a-until').value;if(!v){toast('Chọn hạn chót trước');return}var dt=new Date(v);if(dt<=now()){toast('Hạn chót phải ở tương lai');return}
     store.setWindow(m.id,dt,false).then(function(){m.editUntil=dt;m.locked=false;toast('Đã mở chỉnh sửa tới '+fmtDT(dt));renderAll();$('admin').hidden=false;renderAdmin()}).catch(function(e){toast('Lỗi: '+e.message)})};
   $('a-lock').onclick=function(){store.setWindow(m.id,m.editUntil||null,true).then(function(){m.locked=true;toast('Đã khóa');renderAll();$('admin').hidden=false;renderAdmin()}).catch(function(e){toast('Lỗi: '+e.message)})};
   $('a-unlock').onclick=function(){store.setWindow(m.id,m.editUntil||null,false).then(function(){m.locked=false;toast('Đã gỡ khóa');renderAll();$('admin').hidden=false;renderAdmin()}).catch(function(e){toast('Lỗi: '+e.message)})};
+  }
   function loadUsers(){store.editors().then(function(list){
     $('a-users').innerHTML=list.length?'<table><tbody>'+list.map(function(u){return'<tr><td>'+esc(u.email)+'</td><td>'+esc(u.name||'')+'</td><td>'+(u.role==='editor'?'Được sửa':'Chỉ xem')+'</td><td><button class="btn x" data-rm="'+esc(u.email)+'">Xóa</button></td></tr>'}).join('')+'</tbody></table>':'Chưa có người dùng nào.';
     Array.prototype.forEach.call($('a-users').querySelectorAll('[data-rm]'),function(b){b.onclick=function(){store.delEditor(b.dataset.rm).then(loadUsers)}})}).catch(function(e){$('a-users').textContent='Lỗi: '+e.message})}
@@ -437,10 +438,10 @@ function renderAdmin(){
       var exists=S.meetings.some(function(x){return x.id===d.id});
       if(exists&&!$('j-go').dataset.ok){$('j-go').dataset.ok='1';$('j-go').textContent='Đã có, bấm lần nữa để ghi đè';return}
       store.importMeeting(d,S.email).then(function(){toast('Đã nhập biên bản '+fmt(d.date));return load()}).catch(function(e){jm.textContent='Lỗi: '+e.message})};r.readAsText(f)};
-  $('h-load').onclick=function(){store.history(m.id).then(function(l){$('h-list').innerHTML=l.length?'<table><tbody>'+l.map(function(x){return'<tr><td>'+fmtDT(x.at)+'</td><td>'+esc(x.by)+'</td><td>bản '+x.rev+'</td><td><button class="btn" data-rs="'+esc(x.id)+'">Khôi phục</button></td></tr>'}).join('')+'</tbody></table>':'<p class="hint">Chưa có lịch sử.</p>';
+  if(m){$('h-load').onclick=function(){store.history(m.id).then(function(l){$('h-list').innerHTML=l.length?'<table><tbody>'+l.map(function(x){return'<tr><td>'+fmtDT(x.at)+'</td><td>'+esc(x.by)+'</td><td>bản '+x.rev+'</td><td><button class="btn" data-rs="'+esc(x.id)+'">Khôi phục</button></td></tr>'}).join('')+'</tbody></table>':'<p class="hint">Chưa có lịch sử.</p>';
     Array.prototype.forEach.call($('h-list').querySelectorAll('[data-rs]'),function(b){b.onclick=function(){var it=l.filter(function(z){return z.id===b.dataset.rs})[0];
       store.save(m.id,it.snapshot,m.rev||0,S.email).then(function(nr){Object.assign(m,it.snapshot);m.rev=nr;toast('Đã khôi phục bản '+it.rev);renderAll()}).catch(function(e){toast('Lỗi: '+e.message)})}})}).catch(function(e){toast('Lỗi: '+e.message)})};
-  $('h-export').onclick=function(){var c=clone(m);delete c.updatedAt;c.editUntil=null;c.locked=false;save('bbh-'+m.id+'.json','application/json',JSON.stringify(c,null,1))};
+  $('h-export').onclick=function(){var c=clone(m);delete c.updatedAt;c.editUntil=null;c.locked=false;save('bbh-'+m.id+'.json','application/json',JSON.stringify(c,null,1))}}
 }
 
 /* ====== Xuất file ====== */
