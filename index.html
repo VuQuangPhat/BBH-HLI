@@ -262,7 +262,7 @@ details.dept[open]>summary::after{content:"–"}
     <div class="acts"><button class="btn" id="b-word">Xuất Word</button><button class="btn" id="b-csv">Xuất CSV việc</button><button class="btn" id="b-print">In / PDF</button><button class="btn" id="b-copy">Sao chép biên bản</button></div>
   </div>
   <main id="main"></main>
-  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 24</b></p>
+  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 25</b></p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"></script>
@@ -753,16 +753,37 @@ function startRepEdit(){
   S.draft={rep:true,base:r?(r.rev||0):0,id:id,data:{title:r?r.title||'':'',link:r?r.link||'':'',status:r?r.status||'draft':'draft',sections:secs}};
   S.dirty=false;S.tab=S.rType==='board'?'bod':'rep';renderAll();
 }
+function autoDraftRep(dk,type,p){
+  var tp=tplOf(type),n=tp.length,L=deptTasks(dk,p),rg=periodRange(p),c=cnt(L),sec=tp.map(function(){return[]}),mt=meetingsIn(p).length;
+  var iRes=type==='quarter'?1:0,iBlk=type==='quarter'?2:1,iPlan=n-1;
+  function H(t){return{k:'h',s:[[t,true]]}}function N(t){return{k:'n',s:[[t,false]]}}
+  var done=L.filter(function(r){return r.s.k==='done'}),late=L.filter(function(r){return r.s.k==='late'}),doing=L.filter(function(r){return r.s.k==='doing'}),open=L.filter(function(r){return r.s.k==='open'});
+  var back=periodRows(rg).back.filter(function(r){return ownerDepts(r.t.owner).indexOf(dk)>=0});
+  function line(r,nt){var t=r.t,x=taskLine(r);if(nt){var ns=lastNoteText(r.m,r.t);if(ns)x.s.push([ns,false])}return x}
+  sec[iRes].push(H('VIỆC GIAO TỪ CÁC BUỔI HỌP – '+periodLabel(p).toUpperCase()));
+  sec[iRes].push(N(L.length+' việc giao cho phòng trong '+mt+' buổi họp: '+c.done+' hoàn thành, '+c.doing+' đang thực hiện, '+c.late+' quá hạn, '+c.open+' chưa thực hiện.'+(L.length?' Tỷ lệ hoàn thành '+Math.round(c.done*100/L.length)+'%.':'')));
+  if(done.length){sec[iRes].push(H('Việc đã hoàn thành ('+done.length+')'));done.forEach(function(r){sec[iRes].push(line(r,true))})}
+  if(late.length||back.length){sec[iBlk].push(H('Việc quá hạn, tồn từ kỳ trước ('+(late.length+back.length)+')'));late.concat(back).forEach(function(r){sec[iBlk].push(line(r,true))})}
+  var ing=doing.concat(open);
+  if(ing.length)sec[iBlk].push(H('Việc đang thực hiện, chưa thực hiện ('+ing.length+')')),ing.forEach(function(r){sec[iBlk].push(line(r,true))});
+  insMeet(dk,p).forEach(function(i){if(i.k==='c'||i.k==='h'||i.k==='n'||i.k==='b')sec[iRes].push(i)});
+  var pl=late.concat(back,doing,open);
+  if(pl.length){sec[iPlan].push(H('VIỆC TIẾP TỤC THỰC HIỆN (từ biên bản họp)'));pl.forEach(function(r){sec[iPlan].push(line(r,false))})}
+  return sec}
 function renderRepEditor(){
   var d=deptOf(S.rDept),dd=S.draft.data,tp=tplOf(S.rType);
   var h='<div class="rbar"><b>'+esc(d[1])+' · '+periodLabel(S.rPeriod)+'</b></div><div class="help">Mỗi dòng là một ý. Chọn kiểu dòng ở ô bên trái; Ctrl+B in đậm; Enter thêm dòng; Tab thụt vào. Nên đưa số liệu đã lượng hóa và đối chiếu kế hoạch.</div>';
   h+='<div class="ed"><label>Ghi chú tiêu đề (tuỳ chọn)<input type="text" id="r-title" value="'+esc(dd.title)+'"></label><label>Link tài liệu đầy đủ (Google Drive, PowerPoint…) – tuỳ chọn<input type="url" id="r-link" placeholder="https://" value="'+esc(dd.link)+'"></label><label>Trạng thái<select id="r-status"><option value="draft"'+(dd.status!=='submitted'?' selected':'')+'>Bản nháp</option><option value="submitted"'+(dd.status==='submitted'?' selected':'')+'>Đã nộp</option></select></label></div>';
+  if(S.rType!=='board')h+='<div class="ed"><h3>Tạo tự động từ biên bản họp</h3><p class="hint">Một cú bấm: app điền sẵn việc đã xong, việc quá hạn và tồn đọng, kế hoạch (việc đang làm) của phòng này trong kỳ từ các biên bản họp. Các ý đã gõ được giữ nguyên, nội dung tự động thêm vào cuối từng mục. Số liệu KPI và đề xuất cần phòng tự bổ sung.</p><div class="row"><button type="button" class="btn pri" id="r-auto">Tạo bản nháp tự động từ họp</button></div></div>';
   if(S.rType!=='board')h+='<div class="ed"><h3>Lấy từ họp tuần và báo cáo kỳ con</h3><p class="hint">Trong kỳ có '+meetingsIn(S.rPeriod).length+' buổi họp tuần, '+deptTasks(S.rDept,S.rPeriod).length+' việc giao cho phòng. Chọn mục cần chèn rồi bấm nút; nội dung được thêm vào cuối mục để bạn chỉnh tiếp.</p><div class="row"><label>Chèn vào <select id="r-tgt">'+tp.map(function(x,i){return'<option value="'+i+'">'+esc(x[0])+'</option>'}).join('')+'</select></label><button type="button" class="btn" data-ins="meet">Nội dung họp tuần của phòng</button><button type="button" class="btn" data-ins="done">Việc đã xong</button><button type="button" class="btn" data-ins="open">Việc chưa xong</button>'+(S.rType==='quarter'||S.rType==='year'||S.rType==='half'?'<button type="button" class="btn" data-ins="child">Từ báo cáo '+(S.rType==='quarter'?'tháng':'quý')+' trong kỳ</button>':'')+'</div></div>';
   tp.forEach(function(x,i){h+='<div class="ed"><h3>'+esc(x[0])+'</h3><p class="hint">'+esc(x[1])+'</p>'+blockEditor('be-r'+i,dd.sections[i].items)+'</div>'});
   h+='<div class="stick"><button class="btn pri" id="r-save">Lưu báo cáo</button><button class="btn" id="r-cancel">Hủy, không lưu</button><span id="r-msg" class="emsg" role="status"></span></div>';
   $('main').innerHTML=h;
   $('r-cancel').onclick=function(){if(S.dirty&&!confirm('Hủy các thay đổi chưa lưu?'))return;S.draft=null;S.dirty=false;renderAll()};
   $('r-save').onclick=saveReport;
+  if($('r-auto'))$('r-auto').onclick=function(){var sec=autoDraftRep(S.rDept,S.rType,S.rPeriod),k=0;
+    sec.forEach(function(its,i){var box=$('be-r'+i);if(!box)return;its.forEach(function(p){box.appendChild(rowEl(p));k++})});
+    if(!k){toast('Chưa có việc nào giao cho phòng trong kỳ này');return}S.dirty=true;toast('Đã tạo bản nháp: '+k+' dòng. Kiểm tra, bổ sung KPI rồi bấm Lưu')};
   Array.prototype.forEach.call($('main').querySelectorAll('[data-ins]'),function(b){b.onclick=function(){
     var w=b.dataset.ins,its=w==='meet'?insMeet(S.rDept,S.rPeriod):w==='done'?insTasks(S.rDept,S.rPeriod,true):w==='open'?insTasks(S.rDept,S.rPeriod,false):insChild(S.rDept,S.rType,S.rPeriod);
     if(!its.length){toast('Không có nội dung phù hợp trong kỳ này');return}
