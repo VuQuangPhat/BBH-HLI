@@ -262,7 +262,7 @@ details.dept[open]>summary::after{content:"–"}
     <div class="acts"><button class="btn" id="b-word">Xuất Word</button><button class="btn" id="b-csv">Xuất CSV việc</button><button class="btn" id="b-print">In / PDF</button><button class="btn" id="b-copy">Sao chép biên bản</button></div>
   </div>
   <main id="main"></main>
-  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 21</b></p>
+  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 22</b></p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"></script>
@@ -707,7 +707,7 @@ function renderReports(){
 }
 function repDoc(r,d,sub){var tp=tplOf(r.type,r.period),secs=r.sections||[],n=tp.length,plan=sub==='plan',idx=[],k;
   for(k=0;k<n;k++){if(plan?k===n-1:k<n-1)idx.push(k)}
-  var head=plan?'KẾ HOẠCH SAU '+periodLabel(r.period).toUpperCase():'BÁO CÁO '+periodLabel(r.period).toUpperCase();
+  var head=plan?'KẾ HOẠCH '+periodLabel(r.period).toUpperCase():'BÁO CÁO '+periodLabel(r.period).toUpperCase();
   return'<article class="doc"><h2>'+esc(head)+'</h2><div class="sub2">'+esc(d[1])+(r.title?' · '+esc(r.title):'')+'</div>'+idx.map(function(i){var x=tp[i],it=secs[i]&&secs[i].items||[];return'<h3>'+esc(x[0])+'</h3><div class="blk">'+(it.length?blocks(it,r.type!=='board'):'<p class="hint">Chưa có nội dung.</p>')+'</div>'}).join('')+(plan?'':linkedHTML(r.dept,r.period)+(r.link?'<p>Tài liệu đính kèm: <a href="'+esc(r.link)+'" target="_blank" rel="noopener noreferrer">'+esc(r.link)+'</a></p>':''))+'</article>'}
 function repSubBar(){return'<div class="filters" role="group" aria-label="Phần báo cáo">'+[['rep','Báo cáo'],['plan','Kế hoạch']].map(function(x){return'<button type="button" class="chip" data-rsub="'+x[0]+'" aria-pressed="'+(S.rSub===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'}
 function bindRepSub(){qsa($('main'),'[data-rsub]').forEach(function(b){b.onclick=function(){S.rSub=b.dataset.rsub;renderAll()}})}
