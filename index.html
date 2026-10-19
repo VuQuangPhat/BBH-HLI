@@ -6,6 +6,8 @@
 <style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}.rbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:4px 0 10px}.rbar label{display:flex;gap:6px;align-items:center;font-size:13.5px;color:var(--muted)}.rbar select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
 .rg{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}.rc{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:12px 14px;display:flex;flex-direction:column;gap:6px}.rc .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
 
+#meta:empty,#sum:empty,#edit:empty,#admin:empty{display:none}
+.bar .tabs{overflow-x:auto;flex-wrap:nowrap;max-width:100%;scrollbar-width:none}.bar .tabs::-webkit-scrollbar{display:none}.bar .tab{white-space:nowrap;flex:none}
 .clockbar{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 18px;font-size:13px;color:var(--muted);margin:0 0 6px}.clockbar .ck-d{font-weight:600;color:var(--ink)}.clockbar .ck-t{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent);margin-left:auto;font-size:15px}
 .bar{position:sticky;top:0;z-index:30;background:var(--bg);padding-top:6px}
 .ed:has(>.grid2.narrow){max-width:520px}.grid2.narrow label span{display:inline;margin-left:4px}
@@ -261,16 +263,16 @@ details.dept[open]>summary::after{content:"–"}
     <div class="picker"><label for="mtg">Buổi họp</label><select id="mtg"></select></div>
     <div class="userbox" id="userbox"></div>
   </header>
-  <div class="meta" id="meta"></div>
-  <section class="sum" id="sum" aria-label="Tình trạng công việc"></section>
-  <section class="edit" id="edit"></section>
-  <section class="admin" id="admin" hidden></section>
   <div class="bar">
     <div class="tabs" role="tablist"><button class="tab" role="tab" id="t-viec" aria-selected="true">Việc cần theo dõi</button><button class="tab" role="tab" id="t-all" aria-selected="false">Tất cả việc chưa xong</button><button class="tab" role="tab" id="t-bb" aria-selected="false">Biên bản họp</button><button class="tab" role="tab" id="t-rep" aria-selected="false">Báo cáo phòng</button><button class="tab" role="tab" id="t-prep" aria-selected="false">Chuẩn bị họp</button><button class="tab" role="tab" id="t-bod" aria-selected="false" hidden>TGĐ báo cáo</button></div>
     <div class="acts"><button class="btn" id="b-word">Xuất Word</button><button class="btn" id="b-csv">Xuất CSV việc</button><button class="btn" id="b-print">In / PDF</button><button class="btn" id="b-copy">Sao chép biên bản</button></div>
   </div>
+  <div class="meta" id="meta"></div>
+  <section class="sum" id="sum" aria-label="Tình trạng công việc"></section>
+  <section class="edit" id="edit"></section>
+  <section class="admin" id="admin" hidden></section>
   <main id="main"></main>
-  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 27</b></p>
+  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 29</b></p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"></script>
