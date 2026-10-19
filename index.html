@@ -262,7 +262,7 @@ details.dept[open]>summary::after{content:"–"}
     <div class="acts"><button class="btn" id="b-word">Xuất Word</button><button class="btn" id="b-csv">Xuất CSV việc</button><button class="btn" id="b-print">In / PDF</button><button class="btn" id="b-copy">Sao chép biên bản</button></div>
   </div>
   <main id="main"></main>
-  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 22</b></p>
+  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 23</b></p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"></script>
@@ -350,6 +350,7 @@ function makeFirebaseStore(){
         t.set(ref,o,{merge:true});return nr})})},
     importReport:function(r,who){var o={type:r.type,period:r.period,dept:r.dept,deptName:r.deptName||'',title:r.title||'',link:r.link||'',status:r.status||'submitted',body:JSON.stringify({sections:r.sections||[]}),updatedAt:FV.serverTimestamp(),updatedBy:who,rev:0,locked:false};
       return db.collection('reports').doc(r.id).set(o)},
+    setReportStatus:function(id,v){return db.collection('reports').doc(id).update({status:v})},
     setReportLock:function(id,v){return db.collection('reports').doc(id).update({locked:!!v})},
     deleteReport:function(id){return db.collection('reports').doc(id).delete()},
     now:function(){return new Date()}
@@ -732,12 +733,14 @@ function renderRepView(){
   if(!r){S.rDept=null;return renderReports()}
   var s=repStatus(r),h='<div class="rbar"><button class="btn" id="r-back">← Danh sách</button><span class="pill '+s.c+'">'+s.l+'</span><span class="hint">'+(r.updatedAt?'Cập nhật '+fmtDT(r.updatedAt):'')+(r.updatedBy?' · '+esc(r.updatedBy):'')+'</span></div><div class="row">';
   if(repCan(r))h+='<button class="btn pri" id="r-edit">Sửa báo cáo</button>';
+  if(S.role==='owner'&&!r.locked)h+='<button class="btn pri" id="r-sub">'+(r.status==='submitted'?'Chuyển về bản nháp':'Đánh dấu đã nộp')+'</button>';
   if(S.role==='owner')h+='<button class="btn" id="r-lock">'+(r.locked?'Mở chốt':'Chốt báo cáo')+'</button><button class="btn x" id="r-del">Xóa</button>';
   if(r.link&&validLink(r.link))h+='<a class="btn pri" href="'+esc(r.link)+'" target="_blank" rel="noopener noreferrer">Mở file gốc</a>';
   h+='<button class="btn" id="r-word">Tải Word</button><button class="btn" id="r-print">In</button></div>'+repSubBar()+(S.rSub==='plan'?'':repDash(r))+repDoc(r,d,S.rSub);
   $('main').innerHTML=h;
   $('r-back').onclick=function(){S.rDept=null;renderAll()};bindRepSub();
   if($('r-edit'))$('r-edit').onclick=startRepEdit;
+  if($('r-sub'))$('r-sub').onclick=function(){var v=r.status==='submitted'?'draft':'submitted';store.setReportStatus(r.id,v).then(function(){r.status=v;toast(v==='submitted'?'Đã đánh dấu đã nộp':'Đã chuyển về bản nháp');renderAll()}).catch(function(e){toast('Không thực hiện được: '+(e.message||e.code))})};
   if($('r-lock'))$('r-lock').onclick=function(){store.setReportLock(r.id,!r.locked).then(function(){r.locked=!r.locked;toast(r.locked?'Đã chốt báo cáo':'Đã mở chốt');renderAll()}).catch(function(e){toast('Không thực hiện được: '+(e.message||e.code))})};
   if($('r-del'))$('r-del').onclick=function(){if(!confirm('Xóa báo cáo này?'))return;store.deleteReport(r.id).then(function(){delete S.reps[r.id];S.rDept=null;toast('Đã xóa');renderAll()}).catch(function(e){toast('Không xóa được: '+(e.message||e.code))})};
   $('r-word').onclick=function(){var css='<style>body{font-family:"Times New Roman";font-size:12pt}h2{text-align:center}</style>';save((S.rSub==='plan'?'KH-':'BC-')+r.id+'.doc','application/msword','<html><head><meta charset="utf-8">'+css+'</head><body>'+repDoc(r,d,S.rSub)+'</body></html>')};
