@@ -1,0 +1,8 @@
+Hộp thư đến báo cáo (inbox)
+1. Đặt các file CSV báo cáo vào thư mục này (cạnh index.html trên GitHub Pages).
+2. Thêm một dòng vào index.json, ví dụ:
+[
+ {"file":"kd-tuan42.csv","note":"Báo cáo tuần 42 - Kinh doanh","date":"19/10/2026"}
+]
+3. Mở trang: tab Báo cáo phòng hoặc TGĐ báo cáo sẽ hiện thanh "Có N file báo cáo chờ nhập".
+   Bấm "Xem trước và nhập" -> kiểm tra -> bấm nhập. File đã nhập sẽ không hiện lại trên máy đó.
