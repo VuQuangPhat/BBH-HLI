@@ -39,6 +39,7 @@
 .bs-num{font-size:20px}
 .dk2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.dgp{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}.dgp .dk{grid-template-columns:repeat(3,minmax(0,1fr))!important;margin:0}.dgh{margin:0 0 10px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}.dkt.hl{border-color:var(--accent);background:rgba(19,78,94,.06)}.dpg{margin-top:12px}.dpt{display:flex;justify-content:space-between;gap:8px;font-size:13px}.dpb{height:10px;border-radius:6px;background:rgba(100,116,139,.18);margin-top:5px;overflow:hidden}.dpb i{display:block;height:100%;background:var(--accent);border-radius:6px}.dps{font-size:11.5px;color:var(--muted);margin-top:3px}@media(max-width:760px){.dk2{grid-template-columns:1fr}.dgp .dk{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 .bod-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.bod-lock{font-size:12px;color:var(--muted);margin:4px 0 10px}.bod-more{position:relative}.bod-more summary{list-style:none;cursor:pointer}.bod-menu{position:absolute;z-index:6;right:0;margin-top:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:4px;min-width:210px}.bod-chk{border-radius:10px;padding:10px 12px;margin:0 0 12px;font-size:13px;border:1px solid var(--line)}.bod-chk.warn{border-color:#d95d39;background:rgba(217,93,57,.07)}.bod-chk.ok{border-color:var(--accent);background:rgba(19,78,94,.06)}.bod-cl{margin-top:6px;font-size:12.5px;line-height:1.7}.bod-h{margin:20px 0 8px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}.bod-grp{margin:12px 0}.bod-grp>summary{cursor:pointer;padding:6px 0}.bs-empty{margin:8px 0;padding:8px 12px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:13px}.bod-embd summary{cursor:pointer;margin-top:8px;font-size:13px}.dkt.warn{border-color:#d95d39;background:rgba(217,93,57,.08)}.dkt.warn .v,.dkt.neg .v{color:#d95d39}.dkt.warn .s{color:#d95d39;font-weight:600}@media(max-width:760px){.dkt .v{font-size:18px}.bod-bar .btn{flex:1 1 auto}}@media print{.bod-bar,.bod-chk,.bod-more{display:none}}
+.inb-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}.inb-row>span:first-child{flex:1 1 220px}
 .bod-gs{margin:12px 0}.bod-emb{display:block;width:100%;aspect-ratio:16/9;border:1px solid var(--line);border-radius:10px;margin-top:10px;background:#fff}@media print{.bod-emb{display:none}}
 .bs-src{margin:14px 0 0;font-size:11.5px;color:var(--muted);font-style:italic}.bs-ft{margin-top:8px;padding-top:6px;border-top:1px solid var(--line);font-size:10.5px;letter-spacing:.04em;color:var(--muted)}.bod-lock{font-size:12.5px;color:var(--muted);margin:6px 0}
 .bs-lv{margin-left:auto;font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--muted)}
@@ -260,7 +261,7 @@ details.dept[open]>summary::after{content:"–"}
     <div class="acts"><button class="btn" id="b-word">Xuất Word</button><button class="btn" id="b-csv">Xuất CSV việc</button><button class="btn" id="b-print">In / PDF</button><button class="btn" id="b-copy">Sao chép biên bản</button></div>
   </div>
   <main id="main"></main>
-  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 18</b></p>
+  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 19</b></p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"></script>
@@ -822,10 +823,16 @@ function csvPlan(text,fname){
   var list=order.map(function(id){var G=groups[id],old=S.reps[id];G.old=!!old;G.skip=!!(old&&old.locked&&S.role!=='owner');return G});
   if(!list.length&&!errs.length)errs.push('Không có dòng hợp lệ.');
   return{file:fname,groups:list,errs:errs}}
+function inboxDone(){try{return JSON.parse(localStorage.getItem('bbh_inbox_done')||'[]')}catch(e){return[]}}
+function inboxMark(f){try{var d=inboxDone();if(d.indexOf(f)<0)d.push(f);localStorage.setItem('bbh_inbox_done',JSON.stringify(d))}catch(e){}}
+function inboxLoad(){S.inbox=[];if(typeof fetch!=='function')return;
+  fetch('inbox/index.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():[]}).then(function(l){var d=inboxDone();S.inbox=(Array.isArray(l)?l:[]).filter(function(x){return x&&/^[\w.\-]+\.csv$/i.test(x.file||'')&&d.indexOf(x.file)<0});if(S.inbox.length&&!S.draft&&(S.tab==='rep'||S.tab==='bod'))renderAll()}).catch(function(){})}
+function inboxHTML(){if(S.inbox===undefined)inboxLoad();var l=S.inbox||[];if(!l.length)return'';
+  return'<div class="bod-chk warn inbox"><b>Có '+l.length+' file báo cáo chờ nhập</b>'+l.map(function(x){return'<div class="inb-row"><span>'+esc(x.note||x.file)+' <span class="hint">('+esc(x.file)+(x.date?' · '+esc(x.date):'')+')</span></span><button type="button" class="btn pri inb-prev" data-f="'+esc(x.file)+'">Xem trước và nhập</button><button type="button" class="btn inb-skip" data-f="'+esc(x.file)+'">Bỏ qua</button></div>'}).join('')+'</div>'}
 function csvPanel(t,p){
   if(!(S.role==='owner'||S.role==='editor')||scoped())return'';
   S.csvCtx={t:t,p:p};
-  var P=S.csvPlan,h='<details class="ed csv"'+(P||S.csvOpen?' open':'')+'><summary>Nhập, xuất báo cáo bằng CSV</summary>';
+  var P=S.csvPlan,h=inboxHTML()+'<details class="ed csv"'+(P||S.csvOpen?' open':'')+'><summary>Nhập, xuất báo cáo bằng CSV</summary>';
   h+='<p class="hint">Mỗi dòng của file là một ý của báo cáo. Cột: <b>phong</b> (mkt, kd, vh, tckt, dan hoặc tên phòng), <b>loai</b> (week, month, quarter, half, year, c90), <b>ky</b> (2026-W42, 2026-09, 2026-Q3, 2026-H1, 2026, hoặc ngày bắt đầu của chiến dịch 90 ngày), <b>muc</b> (số thứ tự mục, 1 trở đi), <b>kieu</b> (n đoạn thường, b gạch đầu dòng, h tiêu đề nhỏ, c đề mục), <b>cap</b> (thụt lề 0 đến 3), <b>noidung</b> (dùng **chữ** để in đậm).'+(t==='board'?' <b>Báo cáo HĐQT:</b> phong = tgd, loai = board, ky = 2026-Q3; trong slide, dùng dấu | để chia cột (Nhãn | Giá trị | Ghi chú).':'')+' Dòng có kieu là tieude, link hoặc trangthai (đã nộp / nháp) đặt tiêu đề, link, trạng thái. Phòng, loại, kỳ để trống thì lấy theo dòng trên. Excel tiếng Việt lưu CSV dấu chấm phẩy vẫn đọc được; nên chọn CSV UTF-8.</p>';
   h+='<div class="row"><button type="button" class="btn" id="csv-tpl">Tải file mẫu</button><button type="button" class="btn" id="csv-exp">Xuất CSV '+esc(periodLabel(p).toLowerCase())+'</button><label class="btn pri" for="csv-file">Chọn file CSV để nhập</label><input type="file" id="csv-file" accept=".csv,text/csv,text/plain" hidden></div>';
   h+='<div class="rbar"><label><input type="radio" name="csvmode" value="replace"'+(S.csvMode!=='append'?' checked':'')+'> Thay nội dung các mục có trong file</label><label><input type="radio" name="csvmode" value="append"'+(S.csvMode==='append'?' checked':'')+'> Nối thêm vào cuối mục</label></div>';
@@ -853,7 +860,7 @@ function csvTemplate(){var c=S.csvCtx||{t:S.rType,p:S.rPeriod},t=c.t,p=c.p||defP
   csvDownload('mau-bao-cao-'+t+'.csv',rows)}
 function csvApply(){var P=S.csvPlan;if(!P||S.busy)return;var list=P.groups.filter(function(g){return !g.skip}),i=0,ok=0,fail=[],mode=S.csvMode;S.busy=true;
   function next(){
-    if(i>=list.length){S.busy=false;S.csvPlan=null;toast('Đã cập nhật '+ok+' báo cáo'+(fail.length?'. Lỗi: '+fail.join('; '):''));renderAll();return}
+    if(i>=list.length){S.busy=false;S.csvPlan=null;if(S.inboxCur&&!fail.length){inboxMark(S.inboxCur);S.inbox=(S.inbox||[]).filter(function(x){return x.file!==S.inboxCur})}S.inboxCur=null;toast('Đã cập nhật '+ok+' báo cáo'+(fail.length?'. Lỗi: '+fail.join('; '):''));renderAll();return}
     var g=list[i++],tp=tplOf(g.type,g.period),old=S.reps[g.id],d=deptOf(g.dept);
     var secs=tp.map(function(x,k){var cur=old&&old.sections&&old.sections[k]?clone(old.sections[k].items||[]):[];if(g.secs[k])cur=mode==='append'?cur.concat(clone(g.secs[k])):clone(g.secs[k]);return{items:cur}});
     var payload={type:g.type,period:g.period,dept:g.dept,deptName:d[1],title:g.title!==null?g.title:(old?old.title||'':''),link:g.link!==null?g.link:(old?old.link||'':''),status:g.status||(old?old.status||'draft':'draft'),sections:secs};
@@ -868,6 +875,8 @@ function bindCsv(){
   f.onchange=function(){var file=f.files&&f.files[0];if(!file)return;var rd=new FileReader();
     rd.onload=function(){S.csvPlan=csvPlan(String(rd.result||''),file.name);S.csvOpen=true;renderAll()};
     rd.onerror=function(){toast('Không đọc được file')};rd.readAsText(file,'utf-8')};
+  qsa($('main'),'.inb-prev').forEach(function(b){b.onclick=function(){var fn=b.getAttribute('data-f');fetch('inbox/'+encodeURIComponent(fn),{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(tx){S.csvPlan=csvPlan(tx.replace(/^\ufeff/,''),fn);S.inboxCur=fn;S.csvOpen=true;renderAll();var d=document.querySelector('details.csv');if(d)d.scrollIntoView({behavior:'smooth'})}).catch(function(){toast('Không đọc được file trong thư mục inbox')})}});
+  qsa($('main'),'.inb-skip').forEach(function(b){b.onclick=function(){var fn=b.getAttribute('data-f');inboxMark(fn);S.inbox=(S.inbox||[]).filter(function(x){return x.file!==fn});renderAll()}});
   if($('csv-go'))$('csv-go').onclick=csvApply;
   if($('csv-cancel'))$('csv-cancel').onclick=function(){S.csvPlan=null;renderAll()}}
 
