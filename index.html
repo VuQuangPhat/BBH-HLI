@@ -262,7 +262,7 @@ details.dept[open]>summary::after{content:"–"}
     <div class="acts"><button class="btn" id="b-word">Xuất Word</button><button class="btn" id="b-csv">Xuất CSV việc</button><button class="btn" id="b-print">In / PDF</button><button class="btn" id="b-copy">Sao chép biên bản</button></div>
   </div>
   <main id="main"></main>
-  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 23</b></p>
+  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 24</b></p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"></script>
@@ -1551,7 +1551,7 @@ function renderAll(){
   else renderTasks();
 }
 function load(){
-  return Promise.all([store.list(),store.statuses().catch(function(){return{}}),(store.reports?store.reports().catch(function(){return[]}):Promise.resolve([]))]).then(function(r){var l=r[0];S.stat={};var rs=r[1]||{};Object.keys(rs).forEach(function(k){var v=rs[k];S.stat[k]=(v&&typeof v==='object')?{state:v.state||'',notes:v.notes||[]}:{state:v?'done':'',notes:[]}});S.reps={};(r[2]||[]).forEach(function(x){S.reps[x.id]=x});
+  return Promise.all([store.list(),store.statuses().catch(function(){return{}}),(store.reports?store.reports().catch(function(e){setTimeout(function(){toast('Không tải được báo cáo phòng: '+(e&&(e.code||e.message))+' — kiểm tra Firestore rules đã Publish chưa')},600);return[]}):Promise.resolve([]))]).then(function(r){var l=r[0];S.stat={};var rs=r[1]||{};Object.keys(rs).forEach(function(k){var v=rs[k];S.stat[k]=(v&&typeof v==='object')?{state:v.state||'',notes:v.notes||[]}:{state:v?'done':'',notes:[]}});S.reps={};(r[2]||[]).forEach(function(x){S.reps[x.id]=x});
     S.meetings=l.map(scopeMeeting);l=S.meetings;var keep=S.cur&&l.filter(function(x){return x.id===S.cur.id})[0];S.cur=keep||l[0]||null;S.draft=null;S.tab=S.cur?S.tab==='sua'?'bb':S.tab:'viec';renderAll()});
 }
 function onUser(u){
