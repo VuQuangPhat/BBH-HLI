@@ -262,7 +262,7 @@ details.dept[open]>summary::after{content:"–"}
     <div class="acts"><button class="btn" id="b-word">Xuất Word</button><button class="btn" id="b-csv">Xuất CSV việc</button><button class="btn" id="b-print">In / PDF</button><button class="btn" id="b-copy">Sao chép biên bản</button></div>
   </div>
   <main id="main"></main>
-  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 20</b></p>
+  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 21</b></p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"></script>
@@ -1310,7 +1310,7 @@ function renderBod(){
   var per=S.bodP;if(!per||bodPeriods().indexOf(per)<0)per=S.bodP=defPeriod('quarter');
   var id=repId(per,'tgd'),r=S.reps[id],can=S.role==='owner'||S.role==='editor',st=repStatus(r),edit=can&&(!r||repCan(r));
   var h='<div class="rbar bodctl bod-bar"><label>Kỳ báo cáo <select id="bd-per">'+bodPeriods().map(function(x){return'<option value="'+x+'"'+(x===per?' selected':'')+'>'+esc(periodLabel(x))+'</option>'}).join('')+'</select></label><span class="pill '+st.c+'">'+(r?st.l:'Chưa lập')+'</span>'
-    +(edit?'<button type="button" class="btn pri" id="bd-edit">'+(r?'Sửa nội dung':'Soạn báo cáo')+'</button>':'')+(r?'<button type="button" class="btn" id="bd-pptx">Xuất PPTX</button>':'')+'<button type="button" class="btn" id="bd-print">In</button>'
+    +(edit?'<button type="button" class="btn pri" id="bd-edit">'+(r?'Sửa nội dung':'Soạn báo cáo')+'</button>':'')+(r?'<button type="button" class="btn" id="bd-pptx">Xuất PPTX</button>':'')+'<button type="button" class="btn" id="bd-print">In</button>'+(r&&S.role==='owner'?'<button type="button" class="btn x" id="bd-del">Xóa báo cáo</button>':'')
     +(edit?'<details class="bod-more"><summary class="btn">Khác</summary><div class="bod-menu"><button type="button" class="btn" id="bd-draft">'+(S.bodSure?'Bấm lần nữa để ghi đè':'Tạo bản nháp từ dữ liệu')+'</button><button type="button" class="btn" id="bd-csv">Nhập / xuất CSV</button></div></details>':'')+'</div>';
   h+='<p class="bod-lock">'+(bodVer(per)===1?'Khung v1 — báo cáo đã trình HĐQT, lưu nguyên bản'+(r&&!r.locked?' (nên bấm “Chốt báo cáo” để khóa)':'')+'.':'Khung v2')+(r&&r.updatedAt?' · Cập nhật '+fmtDT(r.updatedAt)+(r.updatedBy?' · '+esc(r.updatedBy):''):'')+'</p>';
   if(!r)h+='<div class="empty">Chưa có báo cáo HĐQT cho '+esc(periodLabel(per))+'. Bấm “Khác → Tạo bản nháp từ dữ liệu” để lấy khung và số liệu từ báo cáo các phòng và biên bản họp, hoặc nhập CSV ở cuối trang.</div>';
@@ -1342,6 +1342,7 @@ function renderBod(){
   $('bd-print').onclick=function(){try{window.print()}catch(e){}};
   if($('bd-pptx'))$('bd-pptx').onclick=bodPptx;
   if($('bd-edit'))$('bd-edit').onclick=bodEdit;
+  if($('bd-del'))$('bd-del').onclick=function(){if(S.busy)return;if(!confirm('Xóa báo cáo HĐQT '+periodLabel(per)+(r&&r.locked?' (đang chốt)':'')+'? Không khôi phục được.'))return;S.busy=true;store.deleteReport(id).then(function(){delete S.reps[id];S.busy=false;toast('Đã xóa báo cáo');renderAll()}).catch(function(e){S.busy=false;toast('Không xóa được: '+(e.message||e.code))})};
   if($('bd-csv'))$('bd-csv').onclick=function(){S.csvOpen=true;var d=document.querySelector('details.csv');if(d){d.open=true;d.scrollIntoView({behavior:'smooth'})}};
   Array.prototype.forEach.call(document.querySelectorAll('.bod-j'),function(a){a.onclick=function(e){e.preventDefault();var el=$('bs-'+a.getAttribute('data-j'));if(!el)return;var p=el.parentNode;while(p&&p!==document){if(p.tagName==='DETAILS')p.open=true;p=p.parentNode}el.scrollIntoView({behavior:'smooth',block:'start'})}});
   if($('bd-draft'))$('bd-draft').onclick=function(){
