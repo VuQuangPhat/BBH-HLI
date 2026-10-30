@@ -98,7 +98,7 @@ body .sum{grid-template-columns:repeat(5,minmax(0,1fr))}
 .csv .row{margin:8px 0}
 label.btn{display:inline-block;cursor:pointer}
 .csv .rbar label{display:flex;gap:6px;align-items:center}
-</style>
+.x{}@media print{.clockbar,.brandrow .acts,.foot{display:none!important}.tw{overflow:visible!important}.doc table tr{break-inside:avoid;page-break-inside:avoid}.doc thead{display:table-header-group}.doc h3{break-after:avoid}.doc .sign,.doc .signs{break-inside:avoid}details.dept{break-inside:auto;border:0;margin:6px 0}details.dept>summary{background:none!important;border:0;border-bottom:1px solid #999;border-radius:0;padding:6px 0;font-size:13pt}details.dept>summary::after{content:""!important}.dbody{display:block!important}.doc{max-width:none}}</style>
 <title>Họp giao ban HLI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -272,7 +272,7 @@ details.dept[open]>summary::after{content:"–"}
   <section class="edit" id="edit"></section>
   <section class="admin" id="admin" hidden></section>
   <main id="main"></main>
-  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 30</b></p>
+  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 31</b></p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"></script>
@@ -1650,6 +1650,7 @@ function boot(){startClock();
   store.onAuth(onUser);
 }
 document.addEventListener('click',function(e){var t=e.target;if(!t||!t.closest)return;var sm=t.closest('details.dept>summary');if(!sm)return;e.preventDefault();var d=sm.parentNode;if(d.open)d.removeAttribute('open');else d.setAttribute('open','')});
+(function(){var was=[];window.addEventListener('beforeprint',function(){was=[];document.querySelectorAll('details').forEach(function(d){was.push([d,d.open]);d.setAttribute('open','')})});window.addEventListener('afterprint',function(){was.forEach(function(x){if(!x[1])x[0].removeAttribute('open')});was=[]})})();
 window.addEventListener('DOMContentLoaded',boot);
 })();
 </script>
