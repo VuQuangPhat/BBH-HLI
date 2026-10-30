@@ -272,7 +272,7 @@ details.dept[open]>summary::after{content:"–"}
   <section class="edit" id="edit"></section>
   <section class="admin" id="admin" hidden></section>
   <main id="main"></main>
-  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 33</b></p>
+  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 34</b></p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"></script>
@@ -1650,7 +1650,9 @@ function boot(){startClock();
   store.onAuth(onUser);
 }
 document.addEventListener('click',function(e){var t=e.target;if(!t||!t.closest)return;var sm=t.closest('details.dept>summary');if(!sm)return;e.preventDefault();var d=sm.parentNode;if(d.open)d.removeAttribute('open');else d.setAttribute('open','')});
-(function(){var was=[];window.addEventListener('beforeprint',function(){was=[];document.querySelectorAll('details').forEach(function(d){was.push([d,d.open]);d.setAttribute('open','')})});window.addEventListener('afterprint',function(){was.forEach(function(x){if(!x[1])x[0].removeAttribute('open')});was=[]})})();
+(function(){var was=[],oldT=null;function pname(m){if(!m||!m.date)return null;var p=String(m.date).split('-');if(p.length<3)return null;var wk=null,mo=+p[1],t=String(m.title||'').match(/tu[aâầ]n\s*(\d+)\s*th[aáàạ]ng\s*(\d+)/i);if(!t){var t2=String(m.title||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').match(/tuan\s*(\d+)\s*thang\s*(\d+)/i);if(t2)t=t2}if(t){wk=+t[1];mo=+t[2]}else wk=Math.ceil(+p[2]/7);return p[0]+p[1]+p[2]+' HLI BBH giao ban Tuan '+wk+' Thang '+mo}
+window.addEventListener('beforeprint',function(){var n=pname(S.cur);if(n){oldT=document.title;document.title=n}});window.addEventListener('afterprint',function(){if(oldT!==null){document.title=oldT;oldT=null}});
+window.addEventListener('beforeprint',function(){was=[];document.querySelectorAll('details').forEach(function(d){was.push([d,d.open]);d.setAttribute('open','')})});window.addEventListener('afterprint',function(){was.forEach(function(x){if(!x[1])x[0].removeAttribute('open')});was=[]})})();
 window.addEventListener('DOMContentLoaded',boot);
 })();
 </script>
