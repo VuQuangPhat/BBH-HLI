@@ -273,7 +273,7 @@ details.dept[open]>summary::after{content:"–"}
   <section class="edit" id="edit"></section>
   <section class="admin" id="admin" hidden></section>
   <main id="main"></main>
-  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 38</b></p>
+  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 39</b></p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"></script>
@@ -1565,48 +1565,51 @@ function dxR(t,o){o=o||{};var z=o.sz||24;return'<w:r><w:rPr><w:rFonts w:ascii="T
 function dxS(s,o){o=o||{};return(s||[]).map(function(x){return dxR(x[0],{b:x[1]||o.b,i:o.i,c:o.c,sz:o.sz})}).join('')}
 function dxP(runs,o){o=o||{};return'<w:p><w:pPr>'+(o.keep?'<w:keepNext/>':'')+(o.bt?'<w:pBdr><w:bottom w:val="single" w:sz="6" w:space="1" w:color="999999"/></w:pBdr>':'')+(o.shd?'<w:shd w:val="clear" w:color="auto" w:fill="'+o.shd+'"/>':'')+'<w:spacing w:before="'+(o.bf==null?0:o.bf)+'" w:after="'+(o.af==null?60:o.af)+'" w:line="276" w:lineRule="auto"/>'+(o.ind!=null?'<w:ind w:left="'+o.ind+'" w:hanging="'+(o.hang||0)+'"/>':'')+(o.jc?'<w:jc w:val="'+o.jc+'"/>':'')+'</w:pPr>'+runs+'</w:p>'}
 function dxBlocks(items){return(items||[]).map(function(p){
-  if(p.k==='b'){var l=p.l||0;return dxP(dxR(l?'–\t':'•\t')+dxS(p.s),{ind:360+360*l+(l?0:0),hang:360,af:40})}
+  if(p.k==='b'){var l=p.l||0;return dxP(dxR(l?'–\t':'•\t')+dxS(p.s),{ind:360+360*l,hang:360,af:40,jc:'both'})}
   if(p.k==='h')return dxP(dxS(p.s,{b:1}),{keep:1,bf:80,af:40});
   if(p.k==='c')return dxP(dxR('➔ ',{b:1})+dxS(p.s,{b:1}),{bf:80,af:40});
-  return dxP(dxS(p.s),{af:40})}).join('')}
+  return dxP(dxS(p.s),{af:40,jc:'both'})}).join('')}
 var DXB='<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="888888"/><w:left w:val="single" w:sz="4" w:space="0" w:color="888888"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="888888"/><w:right w:val="single" w:sz="4" w:space="0" w:color="888888"/></w:tcBorders>';
 function dxC(w,inner,o){o=o||{};return'<w:tc><w:tcPr><w:tcW w:w="'+w+'" w:type="dxa"/>'+(o.span?'<w:gridSpan w:val="'+o.span+'"/>':'')+(o.vm?'<w:vMerge'+(o.vm==='r'?' w:val="restart"':'')+'/>':'')+(o.nb?'':DXB)+(o.shd?'<w:shd w:val="clear" w:color="auto" w:fill="'+o.shd+'"/>':'')+'<w:tcMar><w:top w:w="40" w:type="dxa"/><w:left w:w="90" w:type="dxa"/><w:bottom w:w="40" w:type="dxa"/><w:right w:w="90" w:type="dxa"/></w:tcMar><w:vAlign w:val="'+(o.va||'top')+'"/></w:tcPr>'+(inner||'<w:p/>')+'</w:tc>'}
 function dxT(grid,rows){return'<w:tbl><w:tblPr><w:tblW w:w="'+grid.reduce(function(a,b){return a+b},0)+'" w:type="dxa"/><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid>'+grid.map(function(g){return'<w:gridCol w:w="'+g+'"/>'}).join('')+'</w:tblGrid>'+rows.join('')+'</w:tbl>'}
-function dxRow(cells,o){o=o||{};return'<w:tr><w:trPr><w:cantSplit/>'+(o.hd?'<w:tblHeader/>':'')+'</w:trPr>'+cells.join('')+'</w:tr>'}
+function dxRow(cells,o){o=o||{};return'<w:tr><w:trPr>'+(o.ns?'':'<w:cantSplit/>')+(o.h?'<w:trHeight w:val="'+o.h+'"/>':'')+(o.hd?'<w:tblHeader/>':'')+'</w:trPr>'+cells.join('')+'</w:tr>'}
 function dxLogoDims(){try{var b=atob(LOGO.split(',')[1].slice(0,60));return[b.charCodeAt(16)*16777216+b.charCodeAt(17)*65536+b.charCodeAt(18)*256+b.charCodeAt(19),b.charCodeAt(20)*16777216+b.charCodeAt(21)*65536+b.charCodeAt(22)*256+b.charCodeAt(23)]}catch(e){return[326,289]}}
 function docxBody(m){
-  var W=10318,B='';
+  var W=9638,B='';
   var d=dxLogoDims(),cx=900000,cy=Math.round(cx*d[1]/d[0]);
   var logo='<w:p><w:pPr><w:spacing w:before="0" w:after="0"/><w:jc w:val="center"/></w:pPr><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="'+cx+'" cy="'+cy+'"/><wp:docPr id="1" name="Logo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="1" name="logo.png"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdLogo"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="'+cx+'" cy="'+cy+'"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>';
-  var g=[2000,2773,2773,2772];
+  var g=[1800,2613,2613,2612];
   B+=dxT(g,[
-    dxRow([dxC(g[0],logo,{vm:'r',va:'center'}),dxC(g[1]+g[2]+g[3],dxP(dxR('HLI',{b:1,sz:32}),{jc:'center',af:40}),{span:3,va:'center'})]),
-    dxRow([dxC(g[0],'',{vm:'c'}),dxC(g[1],dxP(dxR('Date/Ngày: '+fmt(m.date),{sz:22}),{af:20})),dxC(g[2],dxP(dxR('Time/Thời gian: '+(m.time||''),{sz:22}),{af:20})),dxC(g[3],dxP(dxR('ID/số: '+(m.code||''),{sz:22}),{af:20}))]),
-    dxRow([dxC(g[0],'',{vm:'c'}),dxC(g[1]+g[2]+g[3],dxP(dxR('Address/Địa điểm: ',{sz:22})+dxR(m.place||'',{b:1,sz:22}),{af:20}),{span:3})])]);
-  B+=dxP(dxR('BIÊN BẢN HỌP GIAO BAN HÀNG TUẦN',{b:1,sz:32}),{jc:'center',bf:240,af:60});
-  B+=dxP(dxR('Nội dung: báo cáo tuần và kế hoạch thực hiện công việc theo từng phòng ban',{i:1,sz:22,c:'555555'}),{jc:'center',af:160});
-  B+=dxP(dxR('1. Thành phần tham dự',{b:1,sz:26}),{keep:1,bf:120,af:80});
-  var ag=[700,3300,4318,2000];
-  B+=dxT(ag,[dxRow(['STT','Thành phần tham dự','Công ty / Chức vụ','Ký tên'].map(function(h,i){return dxC(ag[i],dxP(dxR(h,{b:1,sz:22}),{jc:i?'left':'center',af:20}),{shd:'DAE9F7'})}),{hd:1})].concat((m.attendees||[]).map(function(a,i){return dxRow([dxC(ag[0],dxP(dxR(String(i+1),{sz:22}),{jc:'center',af:20})),dxC(ag[1],dxP(dxR(a.name,{sz:22}),{af:20})),dxC(ag[2],dxP(dxR(a.role,{sz:22}),{af:20})),dxC(ag[3],'')])})));
-  B+=dxP(dxR('2. Nội dung cuộc họp',{b:1,sz:26}),{keep:1,bf:200,af:80});
-  (m.principles||[]).forEach(function(s){B+=dxP(dxS(s),{af:80,shd:'EEF2F0'})});
+    dxRow([dxC(g[0],logo,{vm:'r',va:'center'}),dxC(g[1]+g[2]+g[3],dxP(dxR('HLI',{b:1,sz:32}),{jc:'center',af:40}),{span:3,va:'center'})],{ns:1}),
+    dxRow([dxC(g[0],'',{vm:'c'}),dxC(g[1],dxP(dxR('Date/Ngày: '+fmt(m.date),{sz:22}),{af:20})),dxC(g[2],dxP(dxR('Time/Thời gian: '+(m.time||''),{sz:22}),{af:20})),dxC(g[3],dxP(dxR('ID/số: '+(m.code||''),{sz:22}),{af:20}))],{ns:1}),
+    dxRow([dxC(g[0],'',{vm:'c'}),dxC(g[1]+g[2]+g[3],dxP(dxR('Address/Địa điểm: ',{sz:22})+dxR(m.place||'',{b:1,sz:22}),{af:20}),{span:3})],{ns:1})]);
+  B+=dxP(dxR('BIÊN BẢN HỌP GIAO BAN HÀNG TUẦN',{b:1,sz:32}),{jc:'center',bf:280,af:80});
+  B+=dxP(dxR('Nội dung: ',{b:1,sz:24})+dxR('báo cáo tuần và kế hoạch thực hiện công việc theo từng phòng ban',{sz:24}),{jc:'center',af:200});
+  B+=dxP(dxR('1. THÀNH PHẦN THAM DỰ:',{b:1,sz:26}),{keep:1,bf:120,af:100});
+  var ag=[700,3300,3838,1800];
+  B+=dxT(ag,[dxRow(['STT','Thành phần tham dự','Công ty/ Chức vụ','Ký tên'].map(function(h,i){return dxC(ag[i],dxP(dxR(h,{b:1}),{jc:'center',af:40}),{shd:'DAE9F7',va:'center'})}),{hd:1})].concat((m.attendees||[]).map(function(a,i){return dxRow([dxC(ag[0],dxP(dxR(String(i+1)),{jc:'center',af:40}),{va:'center'}),dxC(ag[1],dxP(dxR(a.name),{af:40}),{va:'center'}),dxC(ag[2],dxP(dxR(a.role),{af:40}),{va:'center'}),dxC(ag[3],dxP('',{af:40}))],{h:520})})));
+  B+=dxP(dxR('2. NỘI DUNG CUỘC HỌP:',{b:1,sz:26}),{keep:1,bf:260,af:100});
+  (m.principles||[]).forEach(function(s){B+=dxP(dxS(s),{af:80,jc:'both'})});
+  var dg=[1552,8086],rows=[dxRow([dxC(dg[0],dxP(dxR('Phòng ban',{b:1}),{jc:'center',af:40}),{shd:'DAE9F7',va:'center'}),dxC(dg[1],dxP(dxR('Nội dung công việc',{b:1}),{jc:'center',af:40}),{shd:'DAE9F7',va:'center'})],{hd:1})];
   (m.depts||[]).forEach(function(p){
-    B+=dxP(dxR(deptName(p.name),{b:1,sz:26}),{keep:1,bf:200,af:60,bt:1});
-    B+=dxP(dxR('BÁO CÁO VÀ KẾ HOẠCH',{b:1,sz:18,c:'666666'}),{keep:1,bf:40,af:40});
-    B+=dxBlocks(p.content);
-    if((p.notes||[]).length){B+=dxP(dxR('Ý KIẾN VÀ KẾT LUẬN',{b:1,sz:18,c:'666666'}),{keep:1,bf:100,af:40});B+=dxBlocks(p.notes)}});
-  if(!m._scoped){B+=dxP(dxR('3. Tổng hợp TGĐ giao việc và chỉ đạo',{b:1,sz:26}),{keep:1,bf:240,af:80});B+=dxBlocks(m.general)}
-  var tg=[600,5518,2300,1900];
-  B+=dxP('',{af:60});
-  B+=dxT(tg,[dxRow(['#','Nội dung công việc','Phụ trách','Thời hạn'].map(function(h,i){return dxC(tg[i],dxP(dxR(h,{b:1,sz:22}),{jc:i===1||i===2?'left':'center',af:20}),{shd:'DAE9F7'})}),{hd:1})].concat((m.tasks||[]).map(function(t){return dxRow([dxC(tg[0],dxP(dxR(String(t.id),{sz:22}),{jc:'center',af:20})),dxC(tg[1],dxP(dxR(t.text,{sz:22}),{af:20})),dxC(tg[2],dxP(dxR(t.owner,{sz:22}),{af:20})),dxC(tg[3],dxP(dxR(t.dueText||'',{sz:22}),{jc:'center',af:20}))])})));
+    var nm=deptName(p.name).replace(/^Phòng\s+/,'Phòng '),mt=nm.match(/^(.*?)\s*((?:\([^)]*\)\s*)+)$/),t1=mt?mt[1]:nm,t2=mt?mt[2].replace(/\)\s*\(/g,')\n(').split('\n'):[];
+    var lab=dxP(dxR(t1,{b:1}),{jc:'center',af:40})+t2.map(function(x){return dxP(dxR(x.trim(),{b:1}),{jc:'center',af:20})}).join('');
+    var hasN=(p.notes||[]).length;
+    rows.push(dxRow([dxC(dg[0],lab,{shd:'C1E4F5',vm:hasN?'r':'',va:'center'}),dxC(dg[1],dxBlocks(p.content)||'<w:p/>')],{ns:1}));
+    if(hasN)rows.push(dxRow([dxC(dg[0],'',{shd:'C1E4F5',vm:'c'}),dxC(dg[1],dxBlocks(p.notes),{shd:'F5F5F5'})],{ns:1}))});
+  if((m.general||[]).length&&!m._scoped)rows.push(dxRow([dxC(dg[0],dxP(dxR('Kết luận chung:',{b:1}),{jc:'center',af:40}),{shd:'C1E4F5',va:'center'}),dxC(dg[1],dxBlocks(m.general),{shd:'F5F5F5'})],{ns:1}));
+  B+=dxT(dg,rows);
+  var tg=[600,5138,2100,1800];
+  B+=dxP(dxR('3. BẢNG TỔNG HỢP TỔNG GIÁM ĐỐC GIAO VIỆC & CHỈ ĐẠO:',{b:1,sz:26}),{keep:1,bf:300,af:100});
+  B+=dxT(tg,[dxRow(['STT','Nội dung công việc','Phụ trách','Thời hạn'].map(function(h,i){return dxC(tg[i],dxP(dxR(h,{b:1}),{jc:'center',af:40}),{shd:'DAE9F7',va:'center'})}),{hd:1})].concat((m.tasks||[]).map(function(t){return dxRow([dxC(tg[0],dxP(dxR(String(t.id)),{jc:'center',af:40}),{va:'center'}),dxC(tg[1],dxP(dxR(t.text),{af:40,jc:'both'})),dxC(tg[2],dxP(dxR(t.owner),{jc:'center',af:40}),{va:'center'}),dxC(tg[3],dxP(dxR(t.dueText||''),{jc:'center',af:40}),{va:'center'})])})));
   var sg=m.signers&&m.signers.length?m.signers:[{role:'Thư ký lập biên bản',name:'Vũ Quang Phát',title:'Pháp chế kiêm Trợ lý TGĐ'},{role:'Chủ trì cuộc họp',name:'Trần Trọng Dũng',title:'Tổng giám đốc'}];
   var dd=pd(m.date),sw=Math.floor(W/sg.length);
-  B+=dxP(dxR('Ngày '+dd.getDate()+' tháng '+(dd.getMonth()+1)+' năm '+dd.getFullYear(),{i:1}),{jc:'right',bf:200,af:60,keep:1});
-  B+=dxT(sg.map(function(){return sw}),[dxRow(sg.map(function(x){return dxC(sw,dxP(dxR(x.role,{b:1}),{jc:'center',keep:1,af:20})+dxP(dxR('(Ký, ghi rõ họ tên)',{i:1,sz:20,c:'666666'}),{jc:'center',keep:1,af:900})+dxP(dxR(x.name,{b:1}),{jc:'center',keep:1,af:20})+dxP(dxR(x.title,{sz:22}),{jc:'center',af:20}),{nb:1})}))]);
+  B+=dxP(dxR('Ngày '+dd.getDate()+' tháng '+(dd.getMonth()+1)+' năm '+dd.getFullYear(),{i:1}),{jc:'right',bf:240,af:80,keep:1});
+  B+=dxT(sg.map(function(){return sw}),[dxRow(sg.map(function(x){return dxC(sw,dxP(dxR(x.role,{b:1}),{jc:'center',keep:1,af:20})+dxP(dxR('(Ký, ghi rõ họ tên)',{i:1,sz:22}),{jc:'center',keep:1,af:1000})+dxP(dxR(x.name,{b:1}),{jc:'center',keep:1,af:20})+dxP(dxR(x.title),{jc:'center',af:20}),{nb:1})}))]);
   return B}
 function buildDocx(m){
   var NS='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"';
-  var doc='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document '+NS+'><w:body>'+docxBody(m)+'<w:sectPr><w:footerReference w:type="default" r:id="rIdFt"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="851" w:right="794" w:bottom="1021" w:left="794" w:header="454" w:footer="454" w:gutter="0"/></w:sectPr></w:body></w:document>';
+  var doc='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document '+NS+'><w:body>'+docxBody(m)+'<w:sectPr><w:footerReference w:type="default" r:id="rIdFt"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1021" w:right="1134" w:bottom="1134" w:left="1134" w:header="454" w:footer="454" w:gutter="0"/></w:sectPr></w:body></w:document>';
   var ft='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:ftr '+NS+'><w:p><w:pPr><w:jc w:val="center"/></w:pPr>'+dxR('Trang ',{sz:18,c:'555555'})+'<w:fldSimple w:instr=" PAGE ">'+dxR('1',{sz:18,c:'555555'})+'</w:fldSimple>'+dxR(' / ',{sz:18,c:'555555'})+'<w:fldSimple w:instr=" NUMPAGES ">'+dxR('1',{sz:18,c:'555555'})+'</w:fldSimple></w:p></w:ftr>';
   var z=new JSZip();
   z.file('[Content_Types].xml','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/></Types>');
