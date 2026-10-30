@@ -272,7 +272,7 @@ details.dept[open]>summary::after{content:"–"}
   <section class="edit" id="edit"></section>
   <section class="admin" id="admin" hidden></section>
   <main id="main"></main>
-  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 34</b></p>
+  <p class="foot">Trạng thái việc (chưa thực hiện, đang thực hiện, hoàn thành) và ghi chú tiến độ được lưu chung cho mọi người trong danh sách; ghi chú không nằm trong nội dung biên bản. Nội dung biên bản được lưu trên máy chủ, giới hạn sửa theo thời hạn do Pháp chế đặt. <b>Phiên bản 35</b></p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"></script>
@@ -518,7 +518,7 @@ function signHTML(m){
   var d=pd(m.date);
   return'<p style="text-align:right;margin:6px 0 0;font-style:italic">Ngày '+d.getDate()+' tháng '+(d.getMonth()+1)+' năm '+d.getFullYear()+'</p><table class="sign"><tr>'+sg.map(function(x){return'<td><div class="r">'+esc(x.role)+'</div><div class="h">(Ký, ghi rõ họ tên)</div><div class="sp"></div><div class="nm">'+esc(x.name)+'</div><div class="tl">'+esc(x.title)+'</div></td>'}).join('')+'</tr></table>'}
 function docHTML(m){
-  var h='<article class="doc"><table class="hd"><tr><td class="lg" rowspan="3"><img alt="Hoa Long Invest" src="'+LOGO+'"></td><td class="tt" colspan="3">HLI</td></tr><tr><td>Date/Ngày: '+fmt(m.date)+'</td><td>Time/Thời gian: '+esc(m.time)+'</td><td>ID/số: '+esc(m.code)+'</td></tr><tr><td colspan="3">Address/Địa điểm: <b>'+esc(m.place)+'</b></td></tr></table><h2>BIÊN BẢN HỌP GIAO BAN HÀNG TUẦN</h2><div class="sub2">Nội dung: báo cáo tuần và kế hoạch thực hiện công việc theo từng phòng ban</div>';
+  var h='<article class="doc"><table class="hd"><tr><td class="lg" rowspan="3"><img alt="Hoa Long Invest" decoding="sync" loading="eager" src="'+LOGO+'"></td><td class="tt" colspan="3">HLI</td></tr><tr><td>Date/Ngày: '+fmt(m.date)+'</td><td>Time/Thời gian: '+esc(m.time)+'</td><td>ID/số: '+esc(m.code)+'</td></tr><tr><td colspan="3">Address/Địa điểm: <b>'+esc(m.place)+'</b></td></tr></table><h2>BIÊN BẢN HỌP GIAO BAN HÀNG TUẦN</h2><div class="sub2">Nội dung: báo cáo tuần và kế hoạch thực hiện công việc theo từng phòng ban</div>';
   h+='<h3>1. Thành phần tham dự</h3><div class="tw"><table><thead><tr><th>STT</th><th>Thành phần tham dự</th><th>Công ty / Chức vụ</th><th class="sigcol">Ký tên</th></tr></thead><tbody>'+(m.attendees||[]).map(function(a,i){return'<tr><td>'+(i+1)+'</td><td>'+esc(a.name)+'</td><td>'+esc(a.role)+'</td><td style="height:34px"></td></tr>'}).join('')+'</tbody></table></div>';
   h+='<h3>2. Nội dung cuộc họp</h3>'+(m.principles||[]).map(function(s){return'<p class="rule">'+segs(s)+'</p>'}).join('');
   h+=(m.depts||[]).map(function(d,i){return'<details class="dept"'+(i===0?' open':'')+'><summary><span>'+esc(deptName(d.name))+'</span></summary><div class="dbody"><div class="blk"><h4>Báo cáo và kế hoạch</h4>'+blocks(d.content)+'</div><div class="blk"><h4>Ý kiến và kết luận</h4>'+blocks(d.notes)+'</div></div></details>'}).join('');
@@ -1651,7 +1651,7 @@ function boot(){startClock();
 }
 document.addEventListener('click',function(e){var t=e.target;if(!t||!t.closest)return;var sm=t.closest('details.dept>summary');if(!sm)return;e.preventDefault();var d=sm.parentNode;if(d.open)d.removeAttribute('open');else d.setAttribute('open','')});
 (function(){var was=[],oldT=null;function pname(m){if(!m||!m.date)return null;var p=String(m.date).split('-');if(p.length<3)return null;var wk=null,mo=+p[1],t=String(m.title||'').match(/tu[aâầ]n\s*(\d+)\s*th[aáàạ]ng\s*(\d+)/i);if(!t){var t2=String(m.title||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').match(/tuan\s*(\d+)\s*thang\s*(\d+)/i);if(t2)t=t2}if(t){wk=+t[1];mo=+t[2]}else wk=Math.ceil(+p[2]/7);return p[0]+p[1]+p[2]+' HLI BBH giao ban Tuan '+wk+' Thang '+mo}
-window.addEventListener('beforeprint',function(){var n=pname(S.cur);if(n){oldT=document.title;document.title=n}});window.addEventListener('afterprint',function(){if(oldT!==null){document.title=oldT;oldT=null}});
+window.addEventListener('beforeprint',function(){document.querySelectorAll('.lg img').forEach(function(i){if(!i.complete||!i.naturalWidth){var u=i.src;i.src='';i.src=u}});var n=pname(S.cur);if(n){oldT=document.title;document.title=n}});window.addEventListener('afterprint',function(){if(oldT!==null){document.title=oldT;oldT=null}});
 window.addEventListener('beforeprint',function(){was=[];document.querySelectorAll('details').forEach(function(d){was.push([d,d.open]);d.setAttribute('open','')})});window.addEventListener('afterprint',function(){was.forEach(function(x){if(!x[1])x[0].removeAttribute('open')});was=[]})})();
 window.addEventListener('DOMContentLoaded',boot);
 })();
